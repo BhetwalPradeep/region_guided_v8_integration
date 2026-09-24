@@ -24,29 +24,49 @@ docs/
 
 ## Artifact Storage (S3)
 
-Heavy model and dataset assets should live in the shared S3 prefix:
+The source-of-truth model and validation assets live in the shared S3 prefix:
 
 ```text
-s3://viewray-ai/Patient-vision/Pradeep/
+s3://viewray-ai/Patient-vision/Pradeep/Region-aware-v8/
 ```
 
 Recommended layout:
 
 ```text
-s3://viewray-ai/Patient-vision/Pradeep/
+s3://viewray-ai/Patient-vision/Pradeep/Region-aware-v8/
   model/
     checkpoint_best.weights.h5
     config.json
   docs/
     clinical_overlays_10_cases_full_dvf.tar.gz
-    validation_csvs/
-  dataset/
+    test_eval_region_guided_epoch65_clinical_moving_to_fixed.csv
+    test_eval_region_guided_epoch65_yolo_masked.csv
+  training/
     tfrecords/
     raw_frames/
     masks/
 ```
 
-GitHub should keep only the code, API contract, lightweight docs, and a manifest pointing to the S3 artifacts. Large files such as checkpoints, TFRecords, raw frame caches, and large QC archives should not be committed to Git.
+GitHub should keep only the code, API contract, lightweight docs, and a manifest pointing to the S3 artifacts. Large files such as checkpoints, TFRecords, raw frame caches, and large QC archives are intentionally not committed to Git.
+
+## Download artifacts locally
+
+If the model weights or validation docs are missing locally, download them from S3 before running inference:
+
+```bash
+python download_artifacts.py
+```
+
+This script downloads the locked checkpoint, config, and validation docs into the local repo layout.
+
+If you prefer to do it manually:
+
+```bash
+mkdir -p model docs
+aws s3 cp s3://viewray-ai/Patient-vision/Pradeep/Region-aware-v8/model/checkpoint_best.weights.h5 model/checkpoint_best.weights.h5
+aws s3 cp s3://viewray-ai/Patient-vision/Pradeep/Region-aware-v8/model/config.json model/config.json
+aws s3 cp s3://viewray-ai/Patient-vision/Pradeep/Region-aware-v8/docs/ docs/ --recursive --exclude '*' --include '*.csv' --include '*.tar.gz'
+```
 
 ## Locked Model
 
