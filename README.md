@@ -68,6 +68,27 @@ aws s3 cp s3://viewray-ai/Patient-vision/Pradeep/Region-aware-v8/model/config.js
 aws s3 cp s3://viewray-ai/Patient-vision/Pradeep/Region-aware-v8/docs/ docs/ --recursive --exclude '*' --include '*.csv' --include '*.tar.gz'
 ```
 
+## Inference configuration
+
+The repository now includes a dedicated runtime config file for the clinical inference settings:
+
+```text
+inference_config.json
+```
+
+This file captures the locked runtime contract, including:
+
+- checkpoint path
+- config path
+- model architecture
+- image shape and mask count
+- region order
+- clinical direction convention
+- socket host/port
+- S3 artifact reference
+
+This is the explicit inference configuration for reporting and integration handoff.
+
 ## Locked Model
 
 | Item | Value |
