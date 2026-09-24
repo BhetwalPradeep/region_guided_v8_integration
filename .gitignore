@@ -1,0 +1,19 @@
+__pycache__/
+*.pyc
+*.log
+.DS_Store
+.venv/
+.env
+
+# Large model/data artifacts should be stored in S3, not Git
+model/*.h5
+model/*.weights
+model/*.ckpt
+*.npy
+*.npz
+*.u8
+*.tfrecord
+*.tfrecords/
+*.tar.gz
+*.zip
+*.bin
