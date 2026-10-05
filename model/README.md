@@ -1,7 +1,9 @@
-This directory stores versioned model weights through Git LFS. Each new release
-uses a dated folder, for example:
+This directory stores versioned model weights through Git LFS. Current dated versions:
 
-`model/V8-RG-final-14p-20261005/model.weights.h5`
+- `V8-RG-original-epoch65-20260921/model.weights.h5` (previous integration default)
+- `V8-RG-final-14p-20261005/model.weights.h5` (supervised integration-test candidate)
+
+Each new release uses a dated subfolder named `V8-RG-<version>-YYYYMMDD/`.
 
 GitHub stores a small LFS pointer in the commit and the checkpoint binary in LFS.
 Install Git LFS before cloning or run `git lfs pull` after cloning to fetch the

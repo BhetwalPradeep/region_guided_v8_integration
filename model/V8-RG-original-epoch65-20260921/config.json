@@ -1,0 +1,22 @@
+{
+  "model_name": "V8-RG-original-epoch65-20260921",
+  "model": "region_guided_attention",
+  "target_direction": "fixed_to_moving",
+  "region_guided": true,
+  "dice_only": true,
+  "n_masks": 5,
+  "norm": "layer",
+  "mask_source": "yolo",
+  "normalize": "masked",
+  "mask_types": ["outer_masks", "body", "arms", "face", "hair"],
+  "params": 13387898,
+  "epochs": 100,
+  "best_epoch": 65,
+  "checkpoint_selection": "best_validation",
+  "best_validation_loss": 3.0350488492,
+  "early_stop_epoch": 90,
+  "train_patients": 12,
+  "validation_patients": 2,
+  "test_patients": 3,
+  "release_status": "previous_integration_default"
+}

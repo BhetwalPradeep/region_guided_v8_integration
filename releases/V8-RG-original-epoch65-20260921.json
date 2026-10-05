@@ -1,0 +1,15 @@
+{
+  "release": "V8-RG-original-epoch65-20260921",
+  "status": "previous_integration_default",
+  "s3_source": "s3://viewray-ai/Patient-vision/Pradeep/Region-aware-v8/model/checkpoint_best.weights.h5",
+  "model_directory": "model/V8-RG-original-epoch65-20260921",
+  "checkpoint_file": "model.weights.h5",
+  "checkpoint_sha256": "40fb8ee7b22844d465b5aa54e4adaac6665ec0317d0285788ebd42d2014e91b4",
+  "architecture": "region_guided_attention",
+  "parameters": 13387898,
+  "target_direction": "fixed_to_moving",
+  "best_epoch": 65,
+  "best_validation_loss": 3.0350488492,
+  "early_stop_epoch": 90,
+  "training_split": "12 train / 2 validation / 3 test patients"
+}

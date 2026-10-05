@@ -6,7 +6,8 @@ This package contains the locked region-guided V8 model and a socket-ready infer
 
 The versioned `V8-RG-final-14p-20261005` release is a candidate for supervised,
 non-treatment-affecting integration testing, not a validated clinical positioning
-system. The previous epoch-65 release remains the default below.
+system. The original epoch-65 model remains the legacy default; both it and Final-14p
+now have dated copies in Git LFS.
 
 Download the new checkpoint and matching configuration into its dated folder without replacing the legacy default:
 
@@ -36,24 +37,32 @@ model = RegionGuidedV8(
 )
 ```
 
-Release details and SHA-256 are in `releases/final-14p.json`; the downloader
-verifies the downloaded weights and configuration direction. Model versions live
+Release details and SHA-256 are in `releases/`. The downloader verifies the
+Final-14p S3 copy and configuration direction. Model versions live
 under dated folders in `model/`; for example:
 
 ```text
 model/
   checkpoint_best.weights.h5                    # legacy default, unchanged
   config.json                                    # legacy default, unchanged
+  V8-RG-original-epoch65-20260921/
+    model.weights.h5                            # previous default, Git LFS
+    config.json
   V8-RG-final-14p-20261005/
-    model.weights.h5                            # tracked with Git LFS
-  config.json
+    model.weights.h5                            # integration-test candidate, Git LFS
+    config.json
+releases/
+  V8-RG-original-epoch65-20260921.json
+  final-14p.json
 ```
 
 `.gitattributes` tracks `*.weights.h5` with Git LFS so future model checkpoints
 are versioned with Git without storing their binary contents as ordinary Git
 blobs. After cloning, install Git LFS and fetch the pointers' contents with
 `git lfs pull` if automatic checkout did not fetch them. LFS storage/bandwidth
-is subject to the GitHub account's quota. Use `model/V8-RG-<version>-YYYYMMDD/`
+is subject to the GitHub account's quota. The epoch-65 copy is the previous default;
+the legacy `model/checkpoint_best.weights.h5` path remains unchanged for compatibility.
+Use `model/V8-RG-<version>-YYYYMMDD/`
 for each new checkpoint version, with a `model.weights.h5` filename and its
 matching `config.json`; never overwrite an older dated directory. S3 remains a versioned backup/mirror;
 TFRecords, raw frames, masks, and per-patient evaluation files remain outside
