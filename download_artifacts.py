@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import os
+import argparse
+import hashlib
+import json
 import shutil
 import subprocess
 from pathlib import Path
@@ -24,7 +26,26 @@ def ensure_aws() -> None:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description="Download versioned model artifacts from S3")
+    parser.add_argument("--release", choices=["legacy", "final-14p"], default="legacy")
+    args = parser.parse_args()
     ensure_aws()
+    if args.release == "final-14p":
+        manifest = json.loads((ROOT / "releases" / "final-14p.json").read_text())
+        destination = ROOT / manifest["model_directory"]
+        destination.mkdir(parents=True, exist_ok=True)
+        for name in ("checkpoint_best.weights.h5", "config.json"):
+            run(["aws", "s3", "cp", f'{manifest["s3_prefix"]}/model/{name}', str(destination / name)])
+        checkpoint = destination / "checkpoint_best.weights.h5"
+        with checkpoint.open("rb") as stream:
+            digest = hashlib.file_digest(stream, "sha256").hexdigest()
+        if digest != manifest["checkpoint_sha256"]:
+            raise RuntimeError("Final-14p checkpoint checksum mismatch; do not use these weights")
+        config = json.loads((destination / "config.json").read_text())
+        if config.get("target_direction") != manifest["target_direction"]:
+            raise RuntimeError("Final-14p configuration direction mismatch")
+        print(f"Verified Final-14p artifacts in {destination}")
+        return
     MODEL_DIR.mkdir(exist_ok=True)
     DOCS_DIR.mkdir(exist_ok=True)
 

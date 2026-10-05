@@ -6,8 +6,8 @@ from typing import Any
 
 import numpy as np
 
-from train_consecutive import build_region_guided_attention
-from warp_fn import build_dvf, warp_with_dvf
+from .train_consecutive import build_region_guided_attention
+from .warp_fn import build_dvf, warp_with_dvf
 
 H = W = 256
 N_MASKS = 5
@@ -17,14 +17,17 @@ MASK_TYPES = ["outer_masks", "body", "arms", "face", "hair"]
 class RegionGuidedV8:
     """Locked region-guided V8 inference wrapper.
 
-    The network predicts fixed-to-moving displacement vectors. Clinical
-    registration applies the inverse vectors to the moving image.
+    Checkpoint configuration defines the network's displacement direction.
+    The public API reports both directions for either checkpoint convention.
     """
 
     def __init__(self, checkpoint: str | Path, config: str | Path | None = None):
         self.checkpoint = Path(checkpoint)
         self.config_path = Path(config) if config else self.checkpoint.with_name("config.json")
         self.config: dict[str, Any] = json.loads(self.config_path.read_text()) if self.config_path.exists() else {}
+        self.target_direction = self.config.get("target_direction", "fixed_to_moving")
+        if self.target_direction not in ("fixed_to_moving", "moving_to_fixed"):
+            raise ValueError(f"Unsupported target_direction: {self.target_direction}")
         self.model = build_region_guided_attention(input_shape=(H, W, 12), n_masks=N_MASKS, norm="layer")
         self.model.load_weights(str(self.checkpoint))
 
@@ -75,7 +78,8 @@ class RegionGuidedV8:
         moving_yolo_mask: np.ndarray | None = None,
     ) -> np.ndarray:
         x = self.build_input(fixed_frame_u8, moving_frame_u8, fixed_masks, moving_masks, fixed_yolo_mask, moving_yolo_mask)
-        return self.model(x, training=False).numpy()[0].reshape(N_MASKS, 2).astype(np.float32)
+        predicted = self.model(x, training=False).numpy()[0].reshape(N_MASKS, 2).astype(np.float32)
+        return -predicted if self.target_direction == "moving_to_fixed" else predicted
 
     @staticmethod
     def inverse_displacements(predicted_dxdy: np.ndarray) -> np.ndarray:

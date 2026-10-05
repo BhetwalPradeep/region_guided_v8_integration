@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from warp_fn import build_dvf, warp_translate, warp_with_dvf
+from .warp_fn import build_dvf, warp_translate, warp_with_dvf
 
 
 def inverse_region_displacements(predicted_dxdy: np.ndarray) -> np.ndarray:

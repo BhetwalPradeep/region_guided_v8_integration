@@ -2,6 +2,90 @@
 
 This package contains the locked region-guided V8 model and a socket-ready inference wrapper for clinical moving-to-fixed registration.
 
+## Final-14p integration-test release
+
+The versioned `V8-RG-final-14p-20261005` release is a candidate for supervised,
+non-treatment-affecting integration testing, not a validated clinical positioning
+system. The previous epoch-65 release remains the default below.
+
+Download the new checkpoint and matching configuration without replacing the old files:
+
+```bash
+python download_artifacts.py --release final-14p
+python socket_server.py --host 127.0.0.1 --port 5056 \
+  --checkpoint model/final-14p/checkpoint_best.weights.h5 \
+  --config model/final-14p/config.json
+```
+
+Use a separate test client/port; no automatic couch control. The transport is
+newline-delimited JSON over TCP, not WebSocket. Client file paths must be readable
+on the server. No segmentation models are bundled: the caller supplies frames and masks.
+
+The wrapper reads `target_direction` from the checkpoint config. Final-14p
+predicts **moving-to-fixed directly**. Both response fields retain their names
+and meanings: `moving_to_fixed_dxdy` is the native correction, while
+`fixed_to_moving_dxdy` is its negation. Do not negate the correction again in the
+client. Legacy configs without a direction retain fixed-to-moving behavior.
+
+Python usage:
+
+```python
+model = RegionGuidedV8(
+    checkpoint="model/final-14p/checkpoint_best.weights.h5",
+    config="model/final-14p/config.json",
+)
+```
+
+Release details and SHA-256 are in `releases/final-14p.json`; the downloader
+verifies the weights and configuration direction. Git contains code, sanitized
+runtime configuration, and aggregate results only. Checkpoints are stored under
+the versioned S3 release prefix, not in Git. Raw patient images and per-pair
+patient-identifying evaluation data must not be committed to this repository.
+
+### Training and evaluation
+
+- 14 patients (former train + validation), 16,251 frames, 125,199 record pairs;
+  all three acquisition sessions represented in training.
+- Corrected loader continues across epochs through the record stream.
+- Fixed 29 epochs based on the earlier FullData validation-selected epoch;
+  no validation in this final fit. Despite its filename, `checkpoint_best` is
+  the final epoch, not a validation-selected checkpoint.
+- Cosine horizon retained at 100 x 400 optimizer steps; the inherited loop
+  applies 799 optimizer updates per 400-batch epoch. This behavior was retained,
+  not corrected, to match the selection run's schedule.
+- Same 1,755 skip-10 test pairs from three patients excluded from training;
+  this test set has been reused in multiple experiments.
+
+| Region | Direct run | Final-14p | Valid pairs |
+|---|---:|---:|---:|
+| Outer | 0.9319 | 0.9322 | 1755 |
+| Body | 0.8354 | 0.8352 | 1755 |
+| Arms | 0.6329 | 0.6457 | 1023 |
+| Face | 0.8075 | 0.8028 | 1505 |
+| Hair | 0.8294 | 0.8278 | 1755 |
+
+Values are mean Dice after full five-region displacement-field correction on
+valid pairs. Final-14p is not an across-the-board improvement over Direct.
+
+### Integration checks
+
+Outputs are pixels of the 256 x 256 model image, not mm or couch coordinates.
+For a full-frame resize from 640 x 480 to 256 x 256, map back with
+`dx_camera = dx_model * 640/256` and `dy_camera = dy_model * 480/256`.
+Cropping, padding, camera orientation, and physical calibration require their
+own transforms. The five-vector blended field is not independently predicted
+per-pixel optical flow and does not provide a measured 3D couch correction.
+
+Verify signs with known phantom translations; check readout/arrow agreement,
+mask failures, stale frames, latency, and connectivity before approved shadow-mode
+testing. Do not interpret display thresholds as clinically validated tolerances.
+
+Run compatibility tests:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
 ## Contents
 
 ```text

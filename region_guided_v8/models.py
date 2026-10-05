@@ -24,7 +24,7 @@ from __future__ import annotations
 # set_memory_growth at import time, which TF rejects once the device context has
 # been initialised by building a model. Importing it up front keeps the previous
 # architectures usable for the ablation.
-from train_consecutive import (build_flexunet, build_flexunet_attention,
+from .train_consecutive import (build_flexunet, build_flexunet_attention,
                                 build_region_guided_attention)
 
 import tensorflow as tf

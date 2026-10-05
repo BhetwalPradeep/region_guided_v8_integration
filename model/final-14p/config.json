@@ -1,0 +1,16 @@
+{
+  "model_name": "V8-RG-final-14p-20261005",
+  "model": "region_guided_attention",
+  "target_direction": "moving_to_fixed",
+  "region_guided": true,
+  "dice_only": true,
+  "n_masks": 5,
+  "norm": "layer",
+  "mask_source": "yolo",
+  "normalize": "masked",
+  "mask_types": ["outer_masks", "body", "arms", "face", "hair"],
+  "params": 13387898,
+  "epochs": 29,
+  "checkpoint_selection": "final_epoch_no_validation",
+  "release_status": "supervised_integration_test_candidate"
+}

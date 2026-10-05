@@ -9,6 +9,9 @@ __pycache__/
 model/*.h5
 model/*.weights
 model/*.ckpt
+model/**/*.h5
+model/**/*.weights
+model/**/*.ckpt
 *.npy
 *.npz
 *.u8
