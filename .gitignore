@@ -4,14 +4,16 @@ __pycache__/
 .DS_Store
 .venv/
 .env
+reports/arrow_walkthrough/
 
 # Large model/data artifacts should be stored in S3, not Git
 model/*.h5
-model/*.weights
 model/*.ckpt
 model/**/*.h5
-model/**/*.weights
 model/**/*.ckpt
+!model/*.weights.h5
+!model/**/*.weights.h5
+model/final-14p/
 *.npy
 *.npz
 *.u8

@@ -34,9 +34,11 @@ def main() -> None:
         manifest = json.loads((ROOT / "releases" / "final-14p.json").read_text())
         destination = ROOT / manifest["model_directory"]
         destination.mkdir(parents=True, exist_ok=True)
-        for name in ("checkpoint_best.weights.h5", "config.json"):
-            run(["aws", "s3", "cp", f'{manifest["s3_prefix"]}/model/{name}', str(destination / name)])
-        checkpoint = destination / "checkpoint_best.weights.h5"
+        checkpoint_name = manifest["checkpoint_file"]
+        s3_checkpoint_name = manifest.get("s3_checkpoint_file", checkpoint_name)
+        for s3_name, local_name in ((s3_checkpoint_name, checkpoint_name), ("config.json", "config.json")):
+            run(["aws", "s3", "cp", f'{manifest["s3_prefix"]}/model/{s3_name}', str(destination / local_name)])
+        checkpoint = destination / checkpoint_name
         with checkpoint.open("rb") as stream:
             digest = hashlib.file_digest(stream, "sha256").hexdigest()
         if digest != manifest["checkpoint_sha256"]:

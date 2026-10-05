@@ -8,13 +8,13 @@ The versioned `V8-RG-final-14p-20261005` release is a candidate for supervised,
 non-treatment-affecting integration testing, not a validated clinical positioning
 system. The previous epoch-65 release remains the default below.
 
-Download the new checkpoint and matching configuration without replacing the old files:
+Download the new checkpoint and matching configuration into its dated folder without replacing the legacy default:
 
 ```bash
 python download_artifacts.py --release final-14p
 python socket_server.py --host 127.0.0.1 --port 5056 \
-  --checkpoint model/final-14p/checkpoint_best.weights.h5 \
-  --config model/final-14p/config.json
+  --checkpoint model/V8-RG-final-14p-20261005/model.weights.h5 \
+  --config model/V8-RG-final-14p-20261005/config.json
 ```
 
 Use a separate test client/port; no automatic couch control. The transport is
@@ -31,16 +31,37 @@ Python usage:
 
 ```python
 model = RegionGuidedV8(
-    checkpoint="model/final-14p/checkpoint_best.weights.h5",
-    config="model/final-14p/config.json",
+  checkpoint="model/V8-RG-final-14p-20261005/model.weights.h5",
+  config="model/V8-RG-final-14p-20261005/config.json",
 )
 ```
 
 Release details and SHA-256 are in `releases/final-14p.json`; the downloader
-verifies the weights and configuration direction. Git contains code, sanitized
-runtime configuration, and aggregate results only. Checkpoints are stored under
-the versioned S3 release prefix, not in Git. Raw patient images and per-pair
-patient-identifying evaluation data must not be committed to this repository.
+verifies the downloaded weights and configuration direction. Model versions live
+under dated folders in `model/`; for example:
+
+```text
+model/
+  checkpoint_best.weights.h5                    # legacy default, unchanged
+  config.json                                    # legacy default, unchanged
+  V8-RG-final-14p-20261005/
+    model.weights.h5                            # tracked with Git LFS
+  config.json
+```
+
+`.gitattributes` tracks `*.weights.h5` with Git LFS so future model checkpoints
+are versioned with Git without storing their binary contents as ordinary Git
+blobs. After cloning, install Git LFS and fetch the pointers' contents with
+`git lfs pull` if automatic checkout did not fetch them. LFS storage/bandwidth
+is subject to the GitHub account's quota. Use `model/V8-RG-<version>-YYYYMMDD/`
+for each new checkpoint version, with a `model.weights.h5` filename and its
+matching `config.json`; never overwrite an older dated directory. S3 remains a versioned backup/mirror;
+TFRecords, raw frames, masks, and per-patient evaluation files remain outside
+Git. Do not commit patient-identifying data.
+
+To track a future weight file, `*.weights.h5` is already covered by `.gitattributes`.
+Stage the dated weight normally; Git LFS converts it to a pointer in the Git commit
+and uploads the binary object on push. Verify with `git lfs ls-files` before pushing.
 
 ### Training and evaluation
 
@@ -92,6 +113,11 @@ python -m unittest discover -s tests -v
 model/
   checkpoint_best.weights.h5
   config.json
+  V8-RG-final-14p-20261005/
+    model.weights.h5
+    config.json
+releases/
+  final-14p.json
 region_guided_v8/
   inference.py
   clinical_registration.py
@@ -108,7 +134,8 @@ docs/
 
 ## Artifact Storage (S3)
 
-The source-of-truth model and validation assets live in the shared S3 prefix:
+The legacy model and large training/QC artifacts remain in the shared S3 prefix;
+new dated model versions are stored in Git LFS and mirrored to versioned S3 prefixes:
 
 ```text
 s3://viewray-ai/Patient-vision/Pradeep/Region-aware-v8/
@@ -131,7 +158,9 @@ s3://viewray-ai/Patient-vision/Pradeep/Region-aware-v8/
     masks/
 ```
 
-GitHub should keep only the code, API contract, lightweight docs, and a manifest pointing to the S3 artifacts. Large files such as checkpoints, TFRecords, raw frame caches, and large QC archives are intentionally not committed to Git.
+GitHub stores model checkpoint versions through Git LFS (not normal Git blobs).
+Large TFRecords, raw frame caches, masks, and QC archives remain in S3 and are
+not committed to Git.
 
 ## Download artifacts locally
 
