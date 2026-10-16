@@ -348,3 +348,22 @@ Synthetic sign validation: a known `(12, -7)` px shift corrected from Dice `0.70
 ## Notes for FDA Documentation
 
 Training configuration and inference configuration should be reported separately. Training augmentation is a development setting and is not active during inference. The clinical integration direction is moving-to-fixed, even though the model prediction convention is fixed-to-moving.
+
+## Native 640×480 V8 region-guided model
+
+**Status: validation candidate; not clinically validated.**
+
+- **Artifact:** [`model/V8-RG-native-640x480-20261016/`](model/V8-RG-native-640x480-20261016/)
+- **Input resolution:** 640×480
+- **Validation:** 1,474 pairs; mean Dice change **+0.0134**
+- **Evaluation note:** Predictions were sign-corrected from the model's `moving_to_fixed` target convention to the evaluator's frame-0-to-frame-1 warp convention. Any inference integration must implement and verify the appropriate direction conversion.
+
+| Mask | Dice before | Dice after | Δ Dice | MAE x (px) | MAE y (px) |
+|---|---:|---:|---:|---:|---:|
+| Outer masks | 0.9184 | 0.9191 | +0.0007 | 6.178 | 11.252 |
+| Body | 0.8083 | 0.8104 | +0.0020 | 9.368 | 12.735 |
+| Arms | 0.6583 | 0.6544 | −0.0039 | 58.052 | 23.268 |
+| Face | 0.6555 | 0.6799 | +0.0244 | 9.900 | 30.954 |
+| Hair | 0.5449 | 0.5889 | +0.0440 | 13.324 | 30.049 |
+
+These are validation results, not independent test results or evidence of clinical safety. The arms mask regressed slightly. Clinical integration requires a validated inference pipeline, independent testing, and appropriate clinical review.
