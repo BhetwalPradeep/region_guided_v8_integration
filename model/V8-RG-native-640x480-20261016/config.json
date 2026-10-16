@@ -1,0 +1,97 @@
+{
+  "model": "region_guided_attention",
+  "input_height": 480,
+  "input_width": 640,
+  "norm": "layer",
+  "max_disp": 8,
+  "epochs": 100,
+  "batch_size": 8,
+  "steps_per_epoch": 400,
+  "val_steps": 70,
+  "lr": 0.0003,
+  "lr_min": 1e-06,
+  "weight_decay": 0.0,
+  "patience": 25,
+  "seed": 42,
+  "skips": [
+    1,
+    2,
+    3,
+    5,
+    8,
+    10,
+    15,
+    20,
+    30
+  ],
+  "val_skip": 10,
+  "huber_delta": 1.0,
+  "dice_weight": 1.0,
+  "mag_weight": false,
+  "inv_mag_weight": false,
+  "no_augment": false,
+  "shift_max": 50.0,
+  "shift_prob": 0.7,
+  "shift_dist": "mixture",
+  "frame_border": "reflect",
+  "edge_blank": false,
+  "mask_input": false,
+  "mask_source": "sapiens",
+  "normalize": "none",
+  "tfrecord_compression": "GZIP",
+  "shuffle_buffer": 4096,
+  "tfrecord_dual_targets": true,
+  "single_head": true,
+  "dice_only": true,
+  "region_guided": true,
+  "target_direction": "moving_to_fixed",
+  "n_masks": 5,
+  "mlflow": false,
+  "mlflow_experiment": "rigid-shift",
+  "workers": 32,
+  "lookahead": 16,
+  "resume": false,
+  "init_from": null,
+  "mask_types": [
+    "outer_masks",
+    "body",
+    "arms",
+    "face",
+    "hair"
+  ],
+  "params": 13387898,
+  "artifact_status": "validation candidate; not clinically validated",
+  "validation": {
+    "split": "validation",
+    "pairs": 1474,
+    "mean_dice_delta": 0.0134,
+    "per_mask_dice_before_after_delta": {
+      "outer_masks": [
+        0.9184,
+        0.9191,
+        0.0007
+      ],
+      "body": [
+        0.8083,
+        0.8104,
+        0.002
+      ],
+      "arms": [
+        0.6583,
+        0.6544,
+        -0.0039
+      ],
+      "face": [
+        0.6555,
+        0.6799,
+        0.0244
+      ],
+      "hair": [
+        0.5449,
+        0.5889,
+        0.044
+      ]
+    },
+    "note": "Evaluation used moving_to_fixed sign correction; arms Dice decreased."
+  }
+}
