@@ -1,0 +1,185 @@
+{
+  "model": "region_guided_attention",
+  "model_version": "V8-RG-deployment-matched-640x480-20261026",
+  "input_height": 480,
+  "input_width": 640,
+  "norm": "layer",
+  "n_masks": 5,
+  "single_head": true,
+  "region_guided": true,
+  "mask_input": false,
+  "normalize": "none",
+  "mask_types": [
+    "outer_masks",
+    "body",
+    "arms",
+    "face",
+    "hair"
+  ],
+  "target_direction": "moving_to_fixed",
+  "input_shape": [
+    null,
+    480,
+    640,
+    12
+  ],
+  "output_shape": [
+    null,
+    10
+  ],
+  "input_dtype": "float32",
+  "grayscale_range": [
+    0,
+    1
+  ],
+  "mask_range": [
+    0,
+    1
+  ],
+  "channel_order": [
+    "reference_grayscale",
+    "current_grayscale",
+    "reference_outer",
+    "reference_body",
+    "reference_arms",
+    "reference_face",
+    "reference_hair",
+    "current_outer",
+    "current_body",
+    "current_arms",
+    "current_face",
+    "current_hair"
+  ],
+  "internal_preprocessing": "outer_mask_standardization_and_background_masking",
+  "internal_divide_by_255": false,
+  "output_units": "native_pixels",
+  "output_scale": 1,
+  "artifact_status": "experimental_testing_only; failed_approved_accuracy_gates; not_clinically_validated",
+  "release_approved": false,
+  "best_epoch": 17,
+  "deployment": {
+    "format": "keras_core_weights_h5_with_configured_preprocessing",
+    "path": "model.weights.h5",
+    "signature": "serving_default",
+    "input_key": "input",
+    "output_key": "corrections",
+    "adapter_changes_required": false,
+    "package_loader_requirement": "Use the updated region_guided_v8.native_inference.NativeRegionGuidedV8 with this H5 and matching config. It loads core weights then adds internal preprocessing; public adapter API is unchanged.",
+    "weights_file": "model.weights.h5",
+    "weights_file_role": "Core weights loaded by NativeRegionGuidedV8, which adds the config-selected normalization graph. Do not use an older loader that omits that graph.",
+    "external_preprocessing": "Divide uint8 grayscale by 255 once; do not standardize externally.",
+    "alternative_saved_model_path": "saved_model"
+  },
+  "validation": {
+    "aggregate_gates_pass": false,
+    "outer_head_checks": [
+      {
+        "n": 24,
+        "mean": 0.3277014959603548,
+        "median": 0.3105443865060806,
+        "p95": 0.4905058503150939,
+        "maximum": 0.4988350570201874,
+        "kind": "known",
+        "bin": "0",
+        "limit": 1,
+        "pass": true
+      },
+      {
+        "n": 96,
+        "mean": 1.9240017596942682,
+        "median": 1.733940303325653,
+        "p95": 4.268183469772339,
+        "maximum": 6.281996726989746,
+        "kind": "known",
+        "bin": "10",
+        "limit": 5,
+        "pass": true
+      },
+      {
+        "n": 96,
+        "mean": 6.505031317472458,
+        "median": 5.921331882476807,
+        "p95": 12.30860447883606,
+        "maximum": 19.578704833984375,
+        "kind": "known",
+        "bin": "40",
+        "limit": 5,
+        "pass": false
+      },
+      {
+        "n": 96,
+        "mean": 12.911419368038574,
+        "median": 10.049354553222656,
+        "p95": 27.74924945831299,
+        "maximum": 46.043460845947266,
+        "kind": "known",
+        "bin": "80",
+        "limit": 5,
+        "pass": false
+      },
+      {
+        "n": 48,
+        "mean": 8.733633267848441,
+        "median": 5.680960178375244,
+        "p95": 28.56848211288452,
+        "maximum": 33.49094772338867,
+        "kind": "real",
+        "bin": "0-10",
+        "limit": 5,
+        "pass": false
+      },
+      {
+        "n": 48,
+        "mean": 8.304568749542037,
+        "median": 2.511994242668152,
+        "p95": 43.97005119323728,
+        "maximum": 58.42338180541992,
+        "kind": "real",
+        "bin": "10-30",
+        "limit": 10,
+        "pass": false
+      },
+      {
+        "n": 48,
+        "mean": 6.571774452924728,
+        "median": 4.707594394683838,
+        "p95": 21.296479415893547,
+        "maximum": 31.493934631347656,
+        "kind": "real",
+        "bin": "30-50",
+        "limit": 10,
+        "pass": false
+      },
+      {
+        "n": 48,
+        "mean": 9.40782648573319,
+        "median": 7.670614719390869,
+        "p95": 22.60341510772705,
+        "maximum": 35.479515075683594,
+        "kind": "real",
+        "bin": "50-80",
+        "limit": 10,
+        "pass": false
+      }
+    ],
+    "note": "Validation only; no held-out test certification. Real targets are Dice registration proxies."
+  },
+  "export_reload_parity": {
+    "passed": true,
+    "max_absolute_error": 6.67572021484375e-06,
+    "rtol": 1e-05,
+    "atol": 0.0001,
+    "samples": 1
+  },
+  "runtime": {
+    "tensorflow": "2.21.0",
+    "numpy": "2.5.4"
+  },
+  "sha256": {
+    "model.weights.h5": "42d53388fcdfc89f6fb6510d7021fb88416f13cbdd95b4ed5635cfd9265cecd8",
+    "saved_model/fingerprint.pb": "180df1bac8c1d00d0351a72e52c906eefb2e599879c24719bcb575a78d43566b",
+    "saved_model/saved_model.pb": "d9b1bc2a5d7510a0a441162e8f4c8811f4abd524def01e21bcd464386ad3af74",
+    "saved_model/variables/variables.data-00000-of-00001": "5c8431abc675e8360a127c297ca56a223fc0c38666fdc62cec1d34e24f8f1501",
+    "saved_model/variables/variables.index": "037e05a3496b3e0d7b79f03b713fb4e53034217782e8523321c289f121e73aa6"
+  }
+}
