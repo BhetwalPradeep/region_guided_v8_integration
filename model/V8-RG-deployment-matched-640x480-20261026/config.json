@@ -58,16 +58,17 @@
   "release_approved": false,
   "best_epoch": 17,
   "deployment": {
-    "format": "tensorflow_saved_model",
-    "path": "saved_model",
+    "format": "keras_core_weights_h5_with_configured_preprocessing",
+    "path": "model.weights.h5",
     "signature": "serving_default",
     "input_key": "input",
     "output_key": "corrections",
     "adapter_changes_required": false,
-    "package_loader_requirement": "Load saved_model with tf.saved_model.load; retain the existing adapter API.",
+    "package_loader_requirement": "Use the updated region_guided_v8.native_inference.NativeRegionGuidedV8 with this H5 and matching config. It loads core weights then adds internal preprocessing; public adapter API is unchanged.",
     "weights_file": "model.weights.h5",
-    "weights_file_role": "Core-only weights for reconstruction; do not load alone and omit internal preprocessing.",
-    "external_preprocessing": "Divide uint8 grayscale by 255 once; do not standardize externally."
+    "weights_file_role": "Core weights loaded by NativeRegionGuidedV8, which adds the config-selected normalization graph. Do not use an older loader that omits that graph.",
+    "external_preprocessing": "Divide uint8 grayscale by 255 once; do not standardize externally.",
+    "alternative_saved_model_path": "saved_model"
   },
   "validation": {
     "aggregate_gates_pass": false,

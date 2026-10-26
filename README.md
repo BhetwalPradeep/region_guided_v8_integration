@@ -367,3 +367,38 @@ Training configuration and inference configuration should be reported separately
 | Hair | 0.5449 | 0.5889 | +0.0440 | 13.324 | 30.049 |
 
 These are validation results, not independent test results or evidence of clinical safety. The arms mask regressed slightly. Clinical integration requires a validated inference pipeline, independent testing, and appropriate clinical review.
+
+## Deployment-matched 2026-10-26 H5 testing model
+
+**Experimental only: this checkpoint failed the approved accuracy gates.**
+Use the updated package from branch `native-640x480-inference` together with
+[`model/V8-RG-deployment-matched-640x480-20261026/`](model/V8-RG-deployment-matched-640x480-20261026/).
+No external adapter API changes are required:
+
+```python
+from region_guided_v8.native_inference import NativeRegionGuidedV8
+
+model = NativeRegionGuidedV8(
+    "model/V8-RG-deployment-matched-640x480-20261026/model.weights.h5"
+)
+corrections = model.predict_moving_to_fixed(
+    reference_gray_u8, current_gray_u8, reference_masks, current_masks
+)
+outer_dxdy = corrections[0]
+```
+
+The matching `config.json` is discovered alongside the H5 file. Our loader
+builds the original network, loads its H5 weights, then adds outer-mask
+standardization inside the model. Grayscale is divided by 255 only once by
+input preparation; do not standardize externally. Binary masks retain the
+order outer, body, arms, face, hair for reference then current. Outputs are
+moving-to-fixed corrections in native pixels, without scaling or negation.
+The existing input builder's outer masking is retained and is idempotent
+with internal masking. Direct `model.model` input may instead be unmasked
+unit-range grayscale with the same binary masks.
+
+**Update the inference package as well as the H5/config.** An older loader
+will silently omit normalization if it only loads the core weights. Older
+checkpoints without `internal_preprocessing` keep their previous behavior.
+The previously published SavedModel remains an alternative complete graph;
+it is not needed for this H5 workflow.

@@ -26,6 +26,11 @@ class NativeRegionGuidedV8:
             raise ValueError("This inference path matches normalize=none only")
         if tuple(self.config.get("mask_types", ())) != MASK_TYPES:
             raise ValueError("Checkpoint mask order does not match this adapter")
+        preprocessing = self.config.get("internal_preprocessing")
+        if preprocessing not in (None, "outer_mask_standardization_and_background_masking"):
+            raise ValueError(f"Unsupported internal_preprocessing: {preprocessing}")
+        if preprocessing and self.config.get("internal_divide_by_255") is not False:
+            raise ValueError("Model-side preprocessing must not divide by 255 again")
 
         # Import lazily so input preparation and unit tests do not require TensorFlow.
         from .train_consecutive import build_region_guided_attention
@@ -34,6 +39,10 @@ class NativeRegionGuidedV8:
             input_shape=(HEIGHT, WIDTH, 12), n_masks=5, norm=self.config.get("norm", "layer")
         )
         self.model.load_weights(str(self.checkpoint))
+        if preprocessing:
+            from .preprocessing import wrap_adapter_input
+
+            self.model = wrap_adapter_input(self.model)
 
     @staticmethod
     def build_input(
@@ -42,7 +51,7 @@ class NativeRegionGuidedV8:
         fixed_masks: np.ndarray,
         moving_masks: np.ndarray,
     ) -> np.ndarray:
-        """Build the training-format tensor; frames must be grayscale uint8."""
+        """Build unit-range inputs; frames must be grayscale uint8."""
         fixed = np.asarray(fixed_gray_u8)
         moving = np.asarray(moving_gray_u8)
         if fixed.dtype != np.uint8 or moving.dtype != np.uint8:
@@ -56,7 +65,8 @@ class NativeRegionGuidedV8:
         if fm.shape != expected or mm.shape != expected:
             raise ValueError(f"Mask arrays must have shape {expected}")
 
-        # Training used Sapiens outer masks and normalize=none.
+        # Preserve legacy masking. It is idempotent for the new internal outer
+        # normalization, which computes statistics only inside these masks.
         f = (fixed.astype(np.float32) / 255.0) * fm[0]
         m = (moving.astype(np.float32) / 255.0) * mm[0]
 
