@@ -1,0 +1,14 @@
+{
+  "inference_package_parity": {
+    "cases": 3,
+    "max_absolute_error": 0.0,
+    "cpu_gpu_max_absolute_error": 0.002246260643005371,
+    "cpu_gpu_absolute_tolerance_px": 0.05,
+    "loader": "existing NativeRegionGuidedV8 H5 loader and unchanged public prediction API"
+  },
+  "improved_over_start": true,
+  "baseline_score": 24.074801635742187,
+  "best_score": 23.391677856445312,
+  "weights_sha256": "648a0eb39c1dca595d63be9fbb5d46b80d5058a861b36aa38dbef669970270c7",
+  "release_approved": false
+}

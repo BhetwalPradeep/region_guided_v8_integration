@@ -1,0 +1,228 @@
+{
+  "model": "region_guided_attention",
+  "model_version": "V8-RG-scratch-equal-skips-640x480-20261027",
+  "input_height": 480,
+  "input_width": 640,
+  "norm": "layer",
+  "n_masks": 5,
+  "single_head": true,
+  "region_guided": true,
+  "mask_input": false,
+  "normalize": "none",
+  "mask_types": [
+    "outer_masks",
+    "body",
+    "arms",
+    "face",
+    "hair"
+  ],
+  "target_direction": "moving_to_fixed",
+  "internal_preprocessing": "outer_mask_standardization_and_background_masking",
+  "internal_divide_by_255": false,
+  "output_units": "native_pixels",
+  "output_scale": 1,
+  "input_shape": [
+    null,
+    480,
+    640,
+    12
+  ],
+  "output_shape": [
+    null,
+    10
+  ],
+  "artifact_status": "experimental_testing_only; not_clinically_validated",
+  "initialization": "random_from_scratch",
+  "pretrained_weights_used": false,
+  "release_approved": false,
+  "improved_over_start": true,
+  "best_step": 3000,
+  "limitations": [
+    "Diagnostic held-out subset only, not full test certification.",
+    "Real labels are Dice-registration proxies.",
+    "One outer translation cannot align independent head/torso deformation."
+  ],
+  "deployment": {
+    "format": "keras_core_weights_h5_with_configured_preprocessing",
+    "path": "model.weights.h5",
+    "adapter_changes_required": false,
+    "package_loader_requirement": "Updated NativeRegionGuidedV8 from commit 6c7aca9 or compatible.",
+    "external_preprocessing": "Divide uint8 grayscale by 255 once; no external normalization."
+  },
+  "validation": {
+    "checks": [
+      {
+        "kind": "known",
+        "bin": "0",
+        "n": 24,
+        "mean": 0.06770449977678557,
+        "p95": 0.1457053922116756,
+        "maximum": 0.24061207473278046,
+        "limit": 1
+      },
+      {
+        "kind": "known",
+        "bin": "10",
+        "n": 96,
+        "mean": 5.617328328390916,
+        "p95": 7.135416388511658,
+        "maximum": 7.733959197998047,
+        "limit": 5
+      },
+      {
+        "kind": "known",
+        "bin": "40",
+        "n": 96,
+        "mean": 35.21254996458689,
+        "p95": 36.51394176483154,
+        "maximum": 37.44976806640625,
+        "limit": 5
+      },
+      {
+        "kind": "known",
+        "bin": "80",
+        "n": 96,
+        "mean": 75.30076336860657,
+        "p95": 76.5130386352539,
+        "maximum": 77.06523132324219,
+        "limit": 5
+      },
+      {
+        "kind": "real",
+        "bin": "0-10",
+        "n": 48,
+        "mean": 1.908288587583229,
+        "p95": 4.011311316490174,
+        "maximum": 7.384538173675537,
+        "limit": 5
+      },
+      {
+        "kind": "real",
+        "bin": "10-30",
+        "n": 48,
+        "mean": 13.74460538228353,
+        "p95": 24.170470046997067,
+        "maximum": 25.664657592773438,
+        "limit": 10
+      },
+      {
+        "kind": "real",
+        "bin": "30-50",
+        "n": 48,
+        "mean": 33.89141611258189,
+        "p95": 45.334000968933104,
+        "maximum": 46.097503662109375,
+        "limit": 10
+      },
+      {
+        "kind": "real",
+        "bin": "50-80",
+        "n": 48,
+        "mean": 57.2651903629303,
+        "p95": 68.22128944396972,
+        "maximum": 73.40613555908203,
+        "limit": 10
+      }
+    ],
+    "extended_diagnostics": [
+      {
+        "kind": "known",
+        "bin": "120",
+        "n": 192,
+        "mean": 115.22010695934296,
+        "p95": 116.95838928222656,
+        "maximum": 117.6039810180664
+      },
+      {
+        "kind": "real",
+        "bin": "80-120",
+        "n": 48,
+        "mean": 88.13710196812947,
+        "p95": 105.91649780273437,
+        "maximum": 110.3414077758789
+      }
+    ]
+  },
+  "held_out_test_summary": [
+    {
+      "kind": "real",
+      "bin": "0-10",
+      "n": 24,
+      "mean": 1.4715189585501018,
+      "p95": 4.580375611782071,
+      "maximum": 10.173064231872559
+    },
+    {
+      "kind": "real",
+      "bin": "10-30",
+      "n": 24,
+      "mean": 14.537330547968546,
+      "p95": 24.70484886169433,
+      "maximum": 25.506277084350586
+    },
+    {
+      "kind": "real",
+      "bin": "30-50",
+      "n": 24,
+      "mean": 35.06731859842936,
+      "p95": 44.07188339233398,
+      "maximum": 45.30229949951172
+    },
+    {
+      "kind": "real",
+      "bin": "50-80",
+      "n": 24,
+      "mean": 60.516040007273354,
+      "p95": 71.04066925048828,
+      "maximum": 72.66549682617188
+    },
+    {
+      "kind": "real",
+      "bin": "80-120",
+      "n": 24,
+      "mean": 89.4295384089152,
+      "p95": 102.2902072906494,
+      "maximum": 113.59772491455078
+    },
+    {
+      "kind": "known",
+      "bin": "0",
+      "n": 12,
+      "mean": 0.11774262382338445,
+      "p95": 0.20530063211917876,
+      "maximum": 0.20914845168590546
+    },
+    {
+      "kind": "known",
+      "bin": "10",
+      "n": 48,
+      "mean": 5.683864519000053,
+      "p95": 7.29109263420105,
+      "maximum": 7.7805495262146
+    },
+    {
+      "kind": "known",
+      "bin": "120",
+      "n": 48,
+      "mean": 115.50403388341267,
+      "p95": 116.78281364440917,
+      "maximum": 117.31140899658203
+    },
+    {
+      "kind": "known",
+      "bin": "40",
+      "n": 48,
+      "mean": 35.213223457336426,
+      "p95": 36.57607898712158,
+      "maximum": 36.98637390136719
+    },
+    {
+      "kind": "known",
+      "bin": "80",
+      "n": 48,
+      "mean": 75.21407381693523,
+      "p95": 76.33615303039551,
+      "maximum": 77.11466217041016
+    }
+  ]
+}
