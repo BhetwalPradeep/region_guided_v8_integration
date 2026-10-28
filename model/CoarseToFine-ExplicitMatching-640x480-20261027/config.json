@@ -1,0 +1,88 @@
+{
+  "model": "coarse_to_fine_explicit_v1",
+  "model_version": "CoarseToFine-ExplicitMatching-640x480-20261027",
+  "architecture_family": "shared convolutional feature pyramid with explicit coarse-to-fine correlation; not U-Net",
+  "input_height": 480,
+  "input_width": 640,
+  "input_shape": [null, 480, 640, 12],
+  "output_shape": [null, 10],
+  "n_masks": 5,
+  "mask_types": ["outer_masks", "body", "arms", "face", "hair"],
+  "target_direction": "moving_to_fixed",
+  "output_units": "native_pixels",
+  "output_scale": 1,
+  "internal_preprocessing": "outer_mask_standardization_and_background_masking",
+  "internal_divide_by_255": false,
+  "initialization": "random_from_scratch",
+  "pretrained_weights_used": false,
+  "release_approved": false,
+  "artifact_status": "experimental_only; poor real-pair accuracy; not clinically validated",
+  "best_step": 600,
+  "training": {
+    "batch_size": 8,
+    "optimizer": "Adam with gradient clipping",
+    "learning_rate_schedule": {
+      "type": "linear warm-up then cosine decay",
+      "total_steps": 60000,
+      "warmup_steps": 600,
+      "peak": 0.0003,
+      "floor": 0.00001
+    },
+    "mixture": {
+      "real": 0.5,
+      "identical": 0.15,
+      "exact_synthetic": 0.35
+    },
+    "skip_sampling": "Equal accepted counts across skips 1,2,3,5,8,10,15,20,30",
+    "pair_sampling": "Full shuffled per-kind/per-skip permutations without replacement until each pool is exhausted; early stop can occur before every pair is seen",
+    "early_stopping": {
+      "validation_interval_updates": 600,
+      "patience_checks": 8,
+      "minimum_score_improvement": 0.01
+    }
+  },
+  "validation": {
+    "selection_checkpoint_update": 600,
+    "subset_only": true,
+    "checkpoint_selection_used_test": false,
+    "synthetic_translations": [
+      {"magnitude_px": 0, "n": 24, "mean_error_px": 0.000001, "p95_error_px": 0.000002},
+      {"magnitude_px": 10, "n": 96, "mean_error_px": 0.185536, "p95_error_px": 0.446156},
+      {"magnitude_px": 40, "n": 96, "mean_error_px": 0.009251, "p95_error_px": 0.049705},
+      {"magnitude_px": 80, "n": 96, "mean_error_px": 0.027484, "p95_error_px": 0.144638},
+      {"magnitude_px": 120, "n": 192, "mean_error_px": 0.052045, "p95_error_px": 0.240792}
+    ],
+    "real_pairs": [
+      {"range_px": "0-10", "n": 48, "mean_error_px": 5.742146, "p95_error_px": 28.959540},
+      {"range_px": "10-30", "n": 48, "mean_error_px": 10.715400, "p95_error_px": 46.535618},
+      {"range_px": "30-50", "n": 48, "mean_error_px": 10.101796, "p95_error_px": 29.405823},
+      {"range_px": "50-80", "n": 48, "mean_error_px": 23.413727, "p95_error_px": 92.877074},
+      {"range_px": "80-120", "n": 48, "mean_error_px": 38.496784, "p95_error_px": 162.447628}
+    ]
+  },
+  "held_out_diagnostic_subset": {
+    "subset_only": true,
+    "full_test_certification": false,
+    "real_pairs": [
+      {"range_px": "0-10", "n": 24, "mean_error_px": 17.132056, "p95_error_px": 102.712749},
+      {"range_px": "10-30", "n": 24, "mean_error_px": 22.498062, "p95_error_px": 90.367771},
+      {"range_px": "30-50", "n": 24, "mean_error_px": 18.025685, "p95_error_px": 58.846788},
+      {"range_px": "50-80", "n": 24, "mean_error_px": 23.197203, "p95_error_px": 42.958818},
+      {"range_px": "80-120", "n": 24, "mean_error_px": 32.293395, "p95_error_px": 59.892768}
+    ]
+  },
+  "deployment": {
+    "loader": "model.py:CoarseToFineMatching",
+    "native_region_guided_v8_loader_compatible": false,
+    "existing_region_guided_v8_shift_adapter_compatible": false,
+    "external_preprocessing": "Frames must be grayscale uint8; masks binary; divide frames by 255 exactly once in loader",
+    "output": "Five (dx,dy) moving-to-fixed corrections in native pixels; no additional scaling at 640x480"
+  },
+  "limitations": [
+    "Synthetic translations score well, but real-pair errors are poor and checkpoint is not suitable for deployment.",
+    "Held-out diagnostics are a small subset, not full test certification.",
+    "Training used cached Sapiens-derived masks; YOLO-only outer-mask fallback performance is not established.",
+    "Real displacement labels are registration proxies.",
+    "Nonrigid motion, occlusion, repeated texture, or ambiguous matching can cause large errors."
+  ]
+}

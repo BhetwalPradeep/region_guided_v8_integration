@@ -1,0 +1,6 @@
+{
+  "own_loader_h5_parity_max_abs_px": 0.0,
+  "weights_sha256": "d1b03a3e8f71486e6ac9067cf1524db135ccb42dd16129f4f9698d299ee444ae",
+  "release_approved": false,
+  "native_region_guided_v8_loader_compatible": false
+}
