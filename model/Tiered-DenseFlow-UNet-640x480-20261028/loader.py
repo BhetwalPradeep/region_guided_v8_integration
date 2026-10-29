@@ -10,7 +10,7 @@ from tiered_flow.aggregation import RegionalMedianAggregator
 
 
 class Predictor:
-    def __init__(self, directory=None):
+    def __init__(self, directory=None, checkpoint=None):
         directory = Path(directory) if directory is not None else Path(__file__).resolve().parent
         config = json.loads((directory / "config.json").read_text())
         expected = dict(
@@ -21,12 +21,19 @@ class Predictor:
         for key, value in expected.items():
             if config.get(key) != value:
                 raise ValueError(f"Unexpected {key}: {config.get(key)!r}")
-        checkpoint = directory / "model.keras"
+        checkpoint = Path(checkpoint) if checkpoint is not None else directory / "model.weights.h5"
+        weights_only = checkpoint.name.endswith(".weights.h5")
         with checkpoint.open("rb") as stream:
             digest = hashlib.file_digest(stream, "sha256").hexdigest()
-        if digest != config["checkpoint_sha256"]:
+        expected_digest = config["weights_sha256"] if weights_only else config["checkpoint_sha256"]
+        if digest != expected_digest:
             raise ValueError("Checkpoint SHA256 mismatch")
-        self.model = tf.keras.models.load_model(checkpoint, compile=False)
+        if weights_only:
+            self.model = TieredFlowUNet(name="tiered_flow_unet")
+            self.model.build_from_config({"input_size": [480, 640]})
+            self.model.load_weights(checkpoint)
+        else:
+            self.model = tf.keras.models.load_model(checkpoint, compile=False)
         if not isinstance(self.model, TieredFlowUNet) or self.model.recurrent_steps != 6:
             raise ValueError("Unexpected checkpoint architecture")
         self.aggregator = RegionalMedianAggregator(minimum_pixels=100)

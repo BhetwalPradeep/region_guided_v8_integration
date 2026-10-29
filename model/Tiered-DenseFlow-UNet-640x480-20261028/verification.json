@@ -1,6 +1,13 @@
 {
   "checkpoint_sha256": "c81d1685b454d1e1b86f6502019390b93e0afabfed2899febb1a0ca65d0b4495",
   "standalone_loader_verified": true,
+  "weights_sha256": "82bc518aaf2d96cc053b069be941a8158ba34b3d5acb92dad956a669576f5f2d",
+  "weights_h5_vs_full_keras_exact_parity": true,
+  "socket_tcp_roundtrip_verified": true,
+  "socket_both_directions_verified": true,
+  "socket_outer_rigid_preview_verified": true,
+  "socket_outer_only_validity_verified": true,
+  "socket_invalid_outer_error_verified": true,
   "training_repository_required": false,
   "synthetic_reference_translation_xy": [120, -40],
   "original_checkpoint_parity": {

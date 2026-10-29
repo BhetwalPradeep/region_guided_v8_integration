@@ -62,6 +62,64 @@ experimental checkpoint, not a replacement accuracy release.
 
 ## Loading
 
+The default loader uses **`model.weights.h5`**, the same weights-only checkpoint
+format as previous releases. The architecture is new: do not load these weights
+with the old V8 builder. `model.keras` is also retained as a full-model export.
+After cloning the branch, run `git lfs pull` to fetch the H5 checkpoint.
+
+## Socket-ready handoff
+
+Use the **server inside this model folder**, not the repository-root legacy
+256x256 V8 server. It retains the previous newline-delimited JSON over TCP
+protocol and path-based request keys. This is not a WebSocket service.
+
+From the repository root:
+
+```bash
+git checkout native-640x480-inference
+git lfs pull
+CUDA_VISIBLE_DEVICES=-1 python \
+  model/Tiered-DenseFlow-UNet-640x480-20261028/socket_server.py \
+  --host 127.0.0.1 --port 5057 \
+  --checkpoint model/Tiered-DenseFlow-UNet-640x480-20261028/model.weights.h5
+```
+
+CPU is selected above to avoid allocating uncontrolled GPU memory on a shared
+server. Choose and configure a GPU explicitly in your deployment environment.
+Tested runtime is TensorFlow 2.21; use it for initial integration.
+
+Send one JSON object followed by a newline:
+
+```json
+{"fixed_frame_path":"/shared/fixed.npy","moving_frame_path":"/shared/moving.npy","fixed_masks_path":"/shared/fixed_masks.npy","moving_masks_path":"/shared/moving_masks.npy"}
+```
+
+Paths must exist **on the server**. Frames must be `(480,640)` grayscale uint8,
+masks `(5,480,640)` in outer/body/arms/face/hair order, with values 0/1 or 0/255.
+For outer-only mode, populate channel 0 and zero the other channels. Separate
+YOLO-path overrides are explicitly rejected: supply already-selected masks.
+
+Responses preserve `ok`, `mask_order`, `fixed_to_moving_dxdy`,
+`moving_to_fixed_dxdy`, and `registered_output_path`. Both direction arrays
+have shape `(5,2)`. Use **`moving_to_fixed_dxdy[0]`** for the outer/global
+correction; do not negate it again. Native 640x480 scaling is **1:1**.
+Additional fields include `valid_regions`, `global_couch_shift`, pixel units,
+and per-region Dice/IoU before/after. Invalid non-outer channels contain zero
+placeholders: ignore their shifts/overlap scores when `valid_regions` is false.
+An invalid outer mask returns `ok:false` with an explicit error.
+
+An optional `registered_output_path` saves a uint8 **outer-rigid preview**.
+Unlike the old V8 server, this does not blend five regional shifts into a
+deformation field. This intentional difference is identified in the response
+as `registration_mode:"outer_rigid"`.
+
+The endpoint accepts filesystem paths and can save a requested output file.
+Use only a trusted local client/network, no public exposure or untrusted
+requests; this legacy-compatible transport has no authentication/TLS.
+No couch movement/control is implemented. Keep it observation-only.
+
+## Python loader
+
 Tested with Python 3.12 and TensorFlow 2.21/Keras in float32. Older versions are
 unverified. Put this directory on `sys.path` before importing:
 

@@ -1,6 +1,7 @@
 {
   "architecture": "tiered_correspondence_flow_unet",
   "checkpoint_sha256": "c81d1685b454d1e1b86f6502019390b93e0afabfed2899febb1a0ca65d0b4495",
+  "weights_sha256": "82bc518aaf2d96cc053b069be941a8158ba34b3d5acb92dad956a669576f5f2d",
   "checkpoint_selection": "lowest validation mean foreground endpoint error",
   "checkpoint_epoch": 68,
   "checkpoint_updates": 40800,
