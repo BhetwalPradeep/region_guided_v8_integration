@@ -1,0 +1,15 @@
+{
+  "checkpoint_sha256": "c81d1685b454d1e1b86f6502019390b93e0afabfed2899febb1a0ca65d0b4495",
+  "standalone_loader_verified": true,
+  "training_repository_required": false,
+  "synthetic_reference_translation_xy": [120, -40],
+  "original_checkpoint_parity": {
+    "dense_flow": "exact",
+    "regional_shifts": "exact",
+    "region_validity": "exact"
+  },
+  "ten_value_output_verified": true,
+  "outer_only_missing_region_validity_verified": true,
+  "accuracy_release_approved": false,
+  "note": "Loader execution/parity evidence only; not independent accuracy certification."
+}

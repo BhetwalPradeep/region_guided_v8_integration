@@ -1,0 +1,32 @@
+{
+  "architecture": "tiered_correspondence_flow_unet",
+  "checkpoint_sha256": "c81d1685b454d1e1b86f6502019390b93e0afabfed2899febb1a0ca65d0b4495",
+  "checkpoint_selection": "lowest validation mean foreground endpoint error",
+  "checkpoint_epoch": 68,
+  "checkpoint_updates": 40800,
+  "regions": ["outer", "body", "arms", "face", "hair"],
+  "input_shape": [null, 480, 640, 12],
+  "flow_shape": [null, 480, 640, 2],
+  "shift_shape": [null, 5, 2],
+  "direction": "moving_to_fixed",
+  "units": "native_pixels",
+  "flow_grid": "moving",
+  "output_scale": 1,
+  "recurrent_steps": 6,
+  "parameters": 319692,
+  "regional_aggregation": "componentwise_median",
+  "minimum_region_pixels": 100,
+  "internal_preprocessing": "per_frame_outer_mask_standardization",
+  "input_grayscale_range": [0, 1],
+  "tensorflow_tested": "2.21.0",
+  "release_approved": false,
+  "experimental": true,
+  "intended_use": "observation-only research/phantom evaluation; no automatic couch control",
+  "known_limitations": [
+    "Real small-motion accuracy regressed versus old U-Net",
+    "Outer Dice worsened on 134 of 240 matched real validation pairs",
+    "Real targets are registration proxies, not measured physical movement",
+    "Independent held-out and camera-axis/physical-unit validation required",
+    "Training ended on an empty-foreground synthetic-example assertion"
+  ]
+}
