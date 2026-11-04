@@ -78,14 +78,19 @@ From the repository root:
 ```bash
 git checkout native-640x480-inference
 git lfs pull
-CUDA_VISIBLE_DEVICES=-1 python \
+CUDA_VISIBLE_DEVICES=0 python \
   model/Tiered-DenseFlow-UNet-640x480-20261028/socket_server.py \
   --host 127.0.0.1 --port 5057 \
   --checkpoint model/Tiered-DenseFlow-UNet-640x480-20261028/model.weights.h5
 ```
 
-CPU is selected above to avoid allocating uncontrolled GPU memory on a shared
-server. Choose and configure a GPU explicitly in your deployment environment.
+This exposes GPU 0 to TensorFlow; change `0` to the desired local GPU index.
+The server does not force a device, so TensorFlow uses an available GPU when one
+is visible and compatible. To force CPU-only inference, use
+`CUDA_VISIBLE_DEVICES=-1` instead. Confirm GPU visibility with
+`python -c "import tensorflow as tf; print(tf.config.list_physical_devices('GPU'))"`
+and monitor utilization with `nvidia-smi`. The first request may include
+initialization overhead; measure steady-state latency over several requests.
 Tested runtime is TensorFlow 2.21; use it for initial integration.
 
 Send one JSON object followed by a newline:
