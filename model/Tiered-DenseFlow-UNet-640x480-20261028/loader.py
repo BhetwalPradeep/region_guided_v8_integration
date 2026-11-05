@@ -11,6 +11,8 @@ from tiered_flow.aggregation import RegionalMedianAggregator
 
 class Predictor:
     def __init__(self, directory=None, checkpoint=None):
+        # Keep eager/graph convolution precision consistent; this is process-wide.
+        tf.config.experimental.enable_tensor_float_32_execution(False)
         directory = Path(directory) if directory is not None else Path(__file__).resolve().parent
         config = json.loads((directory / "config.json").read_text())
         expected = dict(
@@ -37,10 +39,17 @@ class Predictor:
         if not isinstance(self.model, TieredFlowUNet) or self.model.recurrent_steps != 6:
             raise ValueError("Unexpected checkpoint architecture")
         self.aggregator = RegionalMedianAggregator(minimum_pixels=100)
+        self._compiled_predict = tf.function(
+            self._predict_impl,
+            input_signature=[tf.TensorSpec([None, 480, 640, 12], tf.float32)],
+            jit_compile=False)
 
     def predict(self, packed):
         """Packed fixed/moving gray then five fixed and five moving binary masks."""
         packed = tf.ensure_shape(tf.cast(packed, tf.float32), [None, 480, 640, 12])
+        return self._compiled_predict(packed)
+
+    def _predict_impl(self, packed):
         inputs = dict(fixed=packed[..., :1], moving=packed[..., 1:2],
                       fixed_masks=packed[..., 2:7], moving_masks=packed[..., 7:12])
         flow = self.model(inputs, training=False)

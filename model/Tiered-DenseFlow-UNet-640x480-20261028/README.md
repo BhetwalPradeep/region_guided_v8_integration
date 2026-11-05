@@ -143,6 +143,35 @@ result = predictor.predict(packed)
 ten_values = predictor.predict_moving_to_fixed(packed)
 ```
 
+`predict()` compiles the model and regional aggregation together using
+`tf.function` (XLA disabled). The same compiled graph handles different batch
+sizes for float32 `[B,480,640,12]` input. Both Python entry points and the
+model-folder socket server use this path; weights, output keys, units, validity
+checks, and Dice/IoU calculations are unchanged. Graph execution can introduce
+small floating-point differences from eager execution.
+
+`Predictor` disables TensorFloat-32 (TF32) execution process-wide to keep
+float32 eager and graph arithmetic consistent. This can affect other
+TensorFlow models in the same process; use a separate inference process if
+they require TF32. Validation compares eager and compiled execution with TF32
+disabled in both paths; it is not bitwise parity with older TF32-enabled runs.
+
+The first prediction includes tracing and device initialization. Keep a single
+`Predictor` alive across requests, warm it up before measuring latency, and wait
+for results (for example via `.numpy()`) before stopping a timer. This is not a
+10-FPS guarantee; benchmark on the target hardware including required input and
+post-processing work.
+
+Regression tests compare eager and compiled execution on synthetic inputs:
+
+```bash
+# Run from this model directory after fetching the weights:
+python -m unittest test_loader -v
+```
+
+Set `TIERED_TEST_CHECKPOINT` to an alternate full `.keras` or `.weights.h5`
+checkpoint matching this bundle's recorded checksum, if needed.
+
 `packed` is float32 `[B,480,640,12]`: fixed gray, moving gray, five fixed
 masks, five moving masks. Gray is unmasked `[0,1]`, divided by 255 **once**.
 Masks are binary, ordered **outer, body, arms, face, hair**. The model performs
